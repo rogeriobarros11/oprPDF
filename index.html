@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flipbook com PDF.js e Turn.js</title>
+    <title>Flipbook com Turn.js e PDF.js</title>
     <style>
         body {
             margin: 0;
@@ -41,8 +41,7 @@
         #flipbook {
             width: 90vw;
             max-width: 800px;
-            height: calc(90vw * 0.75);
-            max-height: 600px;
+            height: 90vh;
             margin: auto;
             transform-origin: center center;
             transition: transform 0.3s ease-in-out;
@@ -50,15 +49,15 @@
 
         .page {
             background-color: white;
-            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
         canvas {
+            width: 100%;
+            height: 100%;
             display: block;
-            margin: 0 auto;
         }
     </style>
 </head>
@@ -77,12 +76,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 
     <script>
-        const pdfURL = "your.pdf"; // Caminho do arquivo PDF
+        const pdfURL = "your.pdf"; // Caminho do PDF
         const flipbook = document.getElementById("flipbook");
-        let zoomLevel = 1.0; // Nível inicial de zoom
+        let zoomLevel = 1.0;
         let pdfInstance;
 
-        // Configuração do PDF.js
+        // Configuração do worker do PDF.js
         pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
 
         // Carregar e renderizar o PDF
@@ -94,25 +93,22 @@
                 await renderPage(i);
             }
 
-            // Inicializa o Turn.js somente após todas as páginas serem carregadas
+            // Inicializar Turn.js após todas as páginas serem carregadas
             initializeTurnJS();
         };
 
-        // Renderizar cada página do PDF
+        // Renderizar cada página
         const renderPage = async (pageNumber) => {
             const page = await pdfInstance.getPage(pageNumber);
             const viewport = page.getViewport({ scale: 1.5 });
 
             const canvas = document.createElement("canvas");
             const context = canvas.getContext("2d");
-
             canvas.width = viewport.width;
             canvas.height = viewport.height;
 
-            // Renderizar a página no canvas
             await page.render({ canvasContext: context, viewport }).promise;
 
-            // Adicionar o canvas ao contêiner do flipbook
             const pageDiv = document.createElement("div");
             pageDiv.className = "page";
             pageDiv.style.width = `${viewport.width}px`;
@@ -122,9 +118,8 @@
             flipbook.appendChild(pageDiv);
         };
 
-        // Inicializar o Turn.js
+        // Inicializar Turn.js
         const initializeTurnJS = () => {
-            console.log("Inicializando o Turn.js...");
             $("#flipbook").turn({
                 width: flipbook.offsetWidth,
                 height: flipbook.offsetHeight,
@@ -143,15 +138,13 @@
         document.getElementById("zoom-in").addEventListener("click", () => applyZoom(0.1));
         document.getElementById("zoom-out").addEventListener("click", () => applyZoom(-0.1));
 
-        // Ajuste responsivo
         window.addEventListener("resize", () => {
             if ($("#flipbook").data("turn")) {
                 $("#flipbook").turn("size", flipbook.offsetWidth, flipbook.offsetHeight);
             }
         });
 
-        // Carregar o PDF
-        loadPDF();
+        loadPDF(); // Carregar PDF ao iniciar
     </script>
 </body>
 </html>
