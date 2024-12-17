@@ -7,7 +7,17 @@
     <!-- Estilo da Biblioteca WowBook.js -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/wowbook/1.3.0/wowbook.css">
     <!-- Seu CSS personalizado -->
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f8f8;
+        }
+    </style>
 </head>
 <body>
     <!-- Contêiner do Flipbook -->
@@ -21,14 +31,14 @@
     <script>
         $(document).ready(function () {
             $("#flipbook").wowBook({
-                pdf: "your.pdf", // Substitua pelo nome do seu PDF
+                pdf: "your.pdf", // Substitua pelo caminho correto do seu PDF
                 width: 800,
                 height: 600,
                 centeredWhenClosed: true,
                 hardcovers: true,
                 flipSound: true,
                 zoomStep: 0.3,
-                pdfFind: true,
+                pdfFind: true, // Permite busca no PDF
                 toolbar: "last-first, zoomin, zoomout, slideshow, find, fullscreen",
                 onLoad: function () {
                     console.log("Flipbook carregado com sucesso!");
