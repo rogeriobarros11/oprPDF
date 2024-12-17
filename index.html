@@ -70,6 +70,13 @@
                 return pdf.getPage(pageNumber).then(page => {
                     const viewport = page.getViewport({ scale: 1 });
 
+//
+             // Aumentar a escala para melhorar a qualidade
+            const highQualityScale = 2.5; // Ajuste para melhorar qualidade (2.0 - 3.0 recomendado)
+            const viewport = page.getViewport({ scale: highQualityScale });
+//
+                    
+
                     // Ajuste dinâmico para telas menores
                     const flipbookWidth = flipbook.offsetWidth;
                     const scale = flipbookWidth / viewport.width;
