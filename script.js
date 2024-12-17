@@ -1,47 +1,42 @@
-const url = './your.pdf'; // Substitua com o caminho correto do seu PDF
+const url = './your.pdf'; // Caminho do PDF no diretório raiz
+const flipbook = document.getElementById('flipbook'); // Contêiner principal
 
-const flipbook = document.getElementById('flipbook'); // Contêiner do flipbook
-
-// Carregar o PDF
 pdfjsLib.getDocument(url).promise.then(pdf => {
-    const totalPages = pdf.numPages;
-    const pageImages = []; // Array para armazenar as imagens
+    const totalPages = pdf.numPages; // Número total de páginas
+    let loadedPages = 0; // Contador de páginas renderizadas
 
-    // Função para renderizar cada página como imagem
-    const renderPageAsImage = (pageNum) => {
-        return pdf.getPage(pageNum).then(page => {
-            const viewport = page.getViewport({ scale: 2 });
-            const canvas = document.createElement('canvas');
+    // Função para renderizar cada página
+    const renderPage = (pageNum) => {
+        pdf.getPage(pageNum).then(page => {
+            const viewport = page.getViewport({ scale: 1.5 }); // Tamanho da página
+            const canvas = document.createElement('canvas'); // Canvas para a página
             const context = canvas.getContext('2d');
-            canvas.width = viewport.width;
             canvas.height = viewport.height;
+            canvas.width = viewport.width;
 
             // Renderiza a página no canvas
-            return page.render({ canvasContext: context, viewport }).promise.then(() => {
-                const image = document.createElement('img');
-                image.src = canvas.toDataURL('image/png'); // Converte o canvas para uma imagem
-                return image;
+            page.render({ canvasContext: context, viewport }).promise.then(() => {
+                const pageDiv = document.createElement('div');
+                pageDiv.className = 'page'; // Classe que Turn.js precisa
+                pageDiv.appendChild(canvas); // Adiciona o canvas à página
+                flipbook.appendChild(pageDiv); // Adiciona ao flipbook
+
+                loadedPages++;
+
+                // Inicializa o Turn.js após todas as páginas carregarem
+                if (loadedPages === totalPages) {
+                    $('#flipbook').turn({
+                        width: 800,
+                        height: 600,
+                        autoCenter: true
+                    });
+                }
             });
         });
     };
 
     // Renderiza todas as páginas
-    const renderAllPages = async () => {
-        for (let i = 1; i <= totalPages; i++) {
-            const img = await renderPageAsImage(i);
-            const pageDiv = document.createElement('div');
-            pageDiv.className = 'page';
-            pageDiv.appendChild(img);
-            flipbook.appendChild(pageDiv);
-        }
-
-        // Inicializa o Turn.js após adicionar todas as páginas
-        $('#flipbook').turn({
-            width: 800,
-            height: 600,
-            autoCenter: true,
-        });
-    };
-
-    renderAllPages();
+    for (let i = 1; i <= totalPages; i++) {
+        renderPage(i);
+    }
 }).catch(err => console.error('Erro ao carregar o PDF:', err));
