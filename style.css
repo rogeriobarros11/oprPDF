@@ -1,41 +1,16 @@
-/* Estilo básico do corpo */
 body {
+    margin: 0;
     font-family: Arial, sans-serif;
     display: flex;
-    flex-direction: column;
+    justify-content: center;
     align-items: center;
-    margin: 0;
+    height: 100vh;
     background: #f8f8f8;
 }
 
-/* Estilização do contêiner principal */
-#pdf-viewer {
-    margin: 20px;
-    text-align: center;
-}
-
-/* Canvas com borda preta para visualização do PDF */
-canvas {
-    border: 1px solid #000;
-}
-
-/* Controles de navegação */
-#controls {
-    margin-top: 10px;
-}
-
-/* Botões de navegação */
-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    border: none;
-    border-radius: 5px;
-    background-color: #007BFF;
-    color: white;
-}
-
-/* Botão ao passar o mouse */
-button:hover {
-    background-color: #0056b3;
+#flipbook {
+    width: 800px; /* Largura do flipbook */
+    height: 600px; /* Altura do flipbook */
+    margin: 0 auto;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
