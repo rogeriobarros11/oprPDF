@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flipbook com Zoom Dinâmico - Turn.js e PDF.js</title>
+    <title>Flipbook com Zoom - Turn.js e PDF.js</title>
     <style>
         body {
             margin: 0;
@@ -44,19 +44,15 @@
             height: calc(90vw * 0.75);
             max-height: 600px;
             margin: auto;
-            transform-origin: center center; /* Zoom origin */
+            transform-origin: center center;
             transition: transform 0.3s ease-in-out;
-        }
-
-        .page {
-            background-color: white;
             overflow: hidden;
         }
 
-        canvas {
+        .page {
             width: 100%;
             height: 100%;
-            display: block;
+            background-color: white;
         }
     </style>
 </head>
@@ -70,11 +66,9 @@
     <!-- Contêiner do Flipbook -->
     <div id="flipbook"></div>
 
-    <!-- jQuery -->
+    <!-- Bibliotecas -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Turn.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
-    <!-- PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 
     <script>
@@ -83,18 +77,19 @@
         let zoomLevel = 1.0; // Nível inicial de zoom
         let pdfInstance;
 
-        // Configuração do PDF.js
+        // Configurar o worker do PDF.js
         pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
 
         // Carregar o PDF
         const loadPDF = async () => {
+            console.log("Carregando PDF...");
             pdfInstance = await pdfjsLib.getDocument(pdfURL).promise;
-            renderFlipbook();
+            renderPages();
         };
 
         // Renderizar páginas do PDF
-        const renderFlipbook = async () => {
-            flipbook.innerHTML = ""; // Limpar contêiner
+        const renderPages = async () => {
+            flipbook.innerHTML = ""; // Limpar o contêiner
 
             const totalPages = pdfInstance.numPages;
 
@@ -108,20 +103,49 @@
                 canvas.width = viewport.width;
                 canvas.height = viewport.height;
 
-                // Renderizar a página no canvas
                 await page.render({ canvasContext: context, viewport }).promise;
 
-                // Inserir cada página como um elemento <div>
+                // Inserir o canvas dentro de um elemento de página
                 const pageDiv = document.createElement("div");
                 pageDiv.className = "page";
-                pageDiv.style.width = `${viewport.width}px`;
-                pageDiv.style.height = `${viewport.height}px`;
                 pageDiv.appendChild(canvas);
-
                 flipbook.appendChild(pageDiv);
             }
 
-            // Inicializar Turn.js
+            initializeFlipbook();
+        };
+
+        // Inicializar o Turn.js
+        const initializeFlipbook = () => {
+            console.log("Inicializando Flipbook...");
             $("#flipbook").turn({
                 width: flipbook.offsetWidth,
-          
+                height: flipbook.offsetHeight,
+                autoCenter: true,
+                duration: 800,
+                display: "double"
+            });
+        };
+
+        // Aplicar Zoom
+        const applyZoom = (delta) => {
+            zoomLevel = Math.max(0.5, Math.min(2.0, zoomLevel + delta));
+            flipbook.style.transform = `scale(${zoomLevel})`;
+        };
+
+        // Eventos de Zoom
+        document.getElementById("zoom-in").addEventListener("click", () => applyZoom(0.1));
+        document.getElementById("zoom-out").addEventListener("click", () => applyZoom(-0.1));
+
+        // Ajustar ao redimensionar
+        window.addEventListener("resize", () => {
+            if ($("#flipbook").data("turn")) {
+                $("#flipbook").turn("size", flipbook.offsetWidth, flipbook.offsetHeight);
+            }
+        });
+
+        // Carregar o PDF ao iniciar
+        loadPDF();
+    </script>
+</body>
+</html>
