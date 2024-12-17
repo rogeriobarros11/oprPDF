@@ -16,10 +16,10 @@
         }
 
         #flipbook {
-            width: 90vw; /* 90% da largura da tela */
-            height: 80vh; /* 80% da altura da tela */
-            max-width: 800px; /* Largura máxima */
-            max-height: 600px; /* Altura máxima */
+            width: 90vw;
+            height: 80vh;
+            max-width: 800px;
+            max-height: 600px;
             margin: auto;
         }
 
@@ -92,12 +92,20 @@
                     await renderPage(i);
                 }
 
-                // Inicializar Turn.js após renderizar as páginas
+                // Inicializa Turn.js com suporte para dispositivos móveis
                 $("#flipbook").turn({
                     width: flipbook.offsetWidth,
                     height: flipbook.offsetHeight,
                     autoCenter: true,
-                    duration: 800
+                    duration: 800,
+                    when: {
+                        start: function (event, pageObject) {
+                            // Suporte para touch
+                            if (event.type === "touchstart") {
+                                event.preventDefault();
+                            }
+                        }
+                    }
                 });
             };
 
