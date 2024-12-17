@@ -4,27 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Flipbook com WowBook.js</title>
-    <!-- Estilo da biblioteca WowBook -->
+
+    <!-- Biblioteca WowBook.js (CSS) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/wowbook/1.3.0/wowbook.css">
+
+    <!-- Estilização personalizada -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Contêiner do Flipbook -->
     <div id="flipbook" style="width: 800px; height: 600px; margin: auto;"></div>
 
-    <!-- Bibliotecas Necessárias -->
+    <!-- Inclusão do jQuery (Necessário para WowBook.js) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Biblioteca WowBook.js (JavaScript) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/wowbook/1.3.0/wowbook.min.js"></script>
+
+    <!-- Script para inicializar o Flipbook -->
     <script>
         $(document).ready(function () {
             $("#flipbook").wowBook({
-                pdf: "your.pdf", // Substitua pelo nome correto do seu arquivo PDF
-                width: 800,
-                height: 600,
+                pdf: "your.pdf", // Substitua pelo caminho correto do seu PDF
+                width: 800, // Largura do Flipbook
+                height: 600, // Altura do Flipbook
                 centeredWhenClosed: true,
                 hardcovers: true,
                 flipSound: true,
                 zoomStep: 0.3,
-                pdfFind: true, // Ativa a pesquisa no PDF
+                pdfFind: true, // Ativa pesquisa no PDF
                 toolbar: "last-first, zoomin, zoomout, slideshow, find, fullscreen",
                 onLoad: function () {
                     console.log("Flipbook carregado com sucesso!");
