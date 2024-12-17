@@ -1,14 +1,15 @@
-const url = './your.pdf'; // Caminho do seu arquivo PDF
+const url = './your.pdf'; // Caminho do arquivo PDF
 const flipbook = document.getElementById('flipbook');
 
+// Carrega o PDF com PDF.js
 pdfjsLib.getDocument(url).promise.then(pdf => {
-    const totalPages = pdf.numPages; // Total de páginas no PDF
-    let pagesLoaded = 0; // Contador de páginas carregadas
+    const totalPages = pdf.numPages; // Número total de páginas
+    let loadedPages = 0; // Contador para rastrear as páginas renderizadas
 
-    // Itera pelas páginas do PDF
-    for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+    // Função para renderizar cada página individualmente
+    const renderPage = (pageNum) => {
         pdf.getPage(pageNum).then(page => {
-            const viewport = page.getViewport({ scale: 1.5 }); // Tamanho da página
+            const viewport = page.getViewport({ scale: 1.5 }); // Define o tamanho
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
             canvas.height = viewport.height;
@@ -16,23 +17,27 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
 
             // Renderiza a página no canvas
             page.render({ canvasContext: context, viewport }).promise.then(() => {
-                // Cria um elemento de página para o Turn.js
-                const pageDiv = document.createElement('div');
-                pageDiv.className = 'page'; // Classe para estilização
-                pageDiv.appendChild(canvas); // Adiciona o canvas no contêiner
+                const pageDiv = document.createElement('div'); // Contêiner da página
+                pageDiv.className = 'page'; // Classe para Turn.js
+                pageDiv.appendChild(canvas); // Adiciona o canvas à página
                 flipbook.appendChild(pageDiv); // Adiciona a página ao flipbook
 
-                pagesLoaded++;
+                loadedPages++;
 
-                // Inicializa o Turn.js após carregar todas as páginas
-                if (pagesLoaded === totalPages) {
+                // Inicializa o Turn.js quando todas as páginas forem carregadas
+                if (loadedPages === totalPages) {
                     $('#flipbook').turn({
-                        width: 800,  // Largura do flipbook
-                        height: 600, // Altura do flipbook
+                        width: 800,
+                        height: 600,
                         autoCenter: true,
                     });
                 }
             });
         });
+    };
+
+    // Renderiza todas as páginas do PDF
+    for (let i = 1; i <= totalPages; i++) {
+        renderPage(i);
     }
 });
