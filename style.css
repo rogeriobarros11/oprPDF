@@ -1,26 +1,41 @@
+/* Estilo básico do corpo */
 body {
+    font-family: Arial, sans-serif;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    height: 100vh;
     margin: 0;
-    background-color: #f8f8f8;
+    background: #f8f8f8;
 }
 
-#flipbook {
-    width: 800px;
-    height: 500px;
-    margin: 0 auto;
+/* Estilização do contêiner principal */
+#pdf-viewer {
+    margin: 20px;
+    text-align: center;
 }
 
-.page {
-    width: 100%;
-    height: 100%;
+/* Canvas com borda preta para visualização do PDF */
+canvas {
+    border: 1px solid #000;
 }
 
-.page img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+/* Controles de navegação */
+#controls {
+    margin-top: 10px;
 }
 
+/* Botões de navegação */
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #007BFF;
+    color: white;
+}
+
+/* Botão ao passar o mouse */
+button:hover {
+    background-color: #0056b3;
+}
