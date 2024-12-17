@@ -3,19 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Livro Folheável</title>
+    <title>PDF Viewer</title>
+    <!-- Estilo CSS externo -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="flipbook">
-        <div class="page"> <img src="images/page1.jpg" alt="Page 1"> </div>
-        <div class="page"> <img src="images/page2.jpg" alt="Page 2"> </div>
-        <div class="page"> <img src="images/page3.jpg" alt="Page 3"> </div>
-        <div class="page"> <img src="images/page4.jpg" alt="Page 4"> </div>
-        <!-- Adicione mais páginas conforme necessário -->
+    <!-- Contêiner principal para o visualizador de PDF -->
+    <div id="pdf-viewer">
+        <!-- Canvas onde o PDF será renderizado -->
+        <canvas id="pdf-canvas"></canvas>
+
+        <!-- Controles de navegação -->
+        <div id="controls">
+            <button id="prev-page">Página Anterior</button>
+            <span id="page-info">
+                Página <span id="current-page">1</span> de <span id="total-pages">1</span>
+            </span>
+            <button id="next-page">Próxima Página</button>
+        </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/turn.js"></script>
+
+    <!-- Biblioteca PDF.js via CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <!-- Script principal do projeto -->
     <script src="script.js"></script>
 </body>
 </html>
