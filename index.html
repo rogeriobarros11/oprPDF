@@ -41,7 +41,7 @@
             max-width: 800px;
             height: calc(90vw * 0.75);
             max-height: 600px;
-            margin: 10px auto;
+            margin: auto;
         }
 
         .page {
@@ -87,15 +87,12 @@
 
         // Carregar e Renderizar o PDF
         const loadPDF = async () => {
-            console.log("Carregando PDF...");
             pdfInstance = await pdfjsLib.getDocument(pdfURL).promise;
-            console.log("PDF carregado com sucesso!");
             renderFlipbook();
         };
 
         // Renderizar todas as páginas
         const renderFlipbook = async () => {
-            console.log("Renderizando flipbook com zoom:", zoomLevel);
             flipbook.innerHTML = ""; // Limpa o conteúdo anterior
             const totalPages = pdfInstance.numPages;
 
@@ -105,7 +102,7 @@
                 const canvas = document.createElement("canvas");
                 const context = canvas.getContext("2d");
 
-                // Ajusta dinamicamente o tamanho do canvas
+                // Ajuste dinâmico do canvas
                 canvas.width = viewport.width;
                 canvas.height = viewport.height;
                 await page.render({ canvasContext: context, viewport }).promise;
@@ -117,16 +114,18 @@
             }
 
             // Inicializa ou recria o Turn.js
-            if ($("#flipbook").data("turn")) {
-                $("#flipbook").turn("destroy");
-            }
-            $("#flipbook").turn({
-                width: flipbook.offsetWidth,
-                height: flipbook.offsetWidth * 0.75,
-                autoCenter: true,
-                duration: 800
-            });
-            console.log("Flipbook renderizado!");
+            setTimeout(() => {
+                if ($("#flipbook").data("turn")) {
+                    $("#flipbook").turn("destroy");
+                }
+                $("#flipbook").turn({
+                    width: flipbook.offsetWidth,
+                    height: flipbook.offsetHeight,
+                    autoCenter: true,
+                    duration: 800,
+                    display: "double" // Força o layout de flipbook
+                });
+            }, 50); // Pequeno atraso para garantir renderização completa
         };
 
         // Funções de Zoom
@@ -147,7 +146,7 @@
         // Reajustar o tamanho ao redimensionar a tela
         window.addEventListener("resize", () => {
             if ($("#flipbook").data("turn")) {
-                $("#flipbook").turn("size", flipbook.offsetWidth, flipbook.offsetWidth * 0.75);
+                $("#flipbook").turn("size", flipbook.offsetWidth, flipbook.offsetHeight);
             }
         });
 
