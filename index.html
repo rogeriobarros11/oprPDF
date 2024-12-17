@@ -17,9 +17,9 @@
 
         #flipbook {
             width: 90vw;
-            height: 80vh;
+            height: auto;
             max-width: 800px;
-            max-height: 600px;
+            aspect-ratio: 4 / 3; /* Mantém proporção 4:3 */
             margin: auto;
         }
 
@@ -34,8 +34,9 @@
         }
 
         canvas {
-            width: 100%;
-            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
     </style>
 </head>
@@ -66,10 +67,9 @@
                 return pdf.getPage(pageNumber).then(page => {
                     const viewport = page.getViewport({ scale: 1 });
 
-                    // Ajuste dinâmico para telas menores
-                    const flipbookWidth = flipbook.offsetWidth;
-                    const flipbookHeight = flipbook.offsetHeight;
-                    const scale = Math.min(flipbookWidth / viewport.width, flipbookHeight / viewport.height);
+                    // Mantém a proporção original da página
+                    const containerWidth = flipbook.offsetWidth;
+                    const scale = containerWidth / viewport.width;
                     const adjustedViewport = page.getViewport({ scale });
 
                     const canvas = document.createElement("canvas");
@@ -92,20 +92,12 @@
                     await renderPage(i);
                 }
 
-                // Inicializa Turn.js com suporte para dispositivos móveis
+                // Inicializa Turn.js
                 $("#flipbook").turn({
                     width: flipbook.offsetWidth,
-                    height: flipbook.offsetHeight,
+                    height: flipbook.offsetWidth * 0.75, // Mantém proporção 4:3
                     autoCenter: true,
-                    duration: 800,
-                    when: {
-                        start: function (event, pageObject) {
-                            // Suporte para touch
-                            if (event.type === "touchstart") {
-                                event.preventDefault();
-                            }
-                        }
-                    }
+                    duration: 800
                 });
             };
 
@@ -116,7 +108,7 @@
 
         // Recalcular o flipbook ao redimensionar a tela
         window.addEventListener("resize", () => {
-            $("#flipbook").turn("size", flipbook.offsetWidth, flipbook.offsetHeight);
+            $("#flipbook").turn("size", flipbook.offsetWidth, flipbook.offsetWidth * 0.75);
         });
     </script>
 </body>
