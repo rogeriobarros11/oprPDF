@@ -13,13 +13,14 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            overflow: hidden;
         }
 
         #flipbook {
             width: 90vw;
             height: auto;
             max-width: 800px;
-            aspect-ratio: 4 / 3; /* Proporção fixa */
+            aspect-ratio: 4 / 3; /* Mantém a proporção fixa */
             margin: auto;
         }
 
@@ -47,7 +48,7 @@
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Turn.js -->
-    <script src="libs/turn.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
     <!-- PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 
@@ -108,6 +109,7 @@
             renderAllPages();
         }).catch(error => {
             console.error("Erro ao carregar o PDF:", error);
+            alert("Não foi possível carregar o PDF. Verifique o arquivo e tente novamente.");
         });
 
         // Recalcular o flipbook ao redimensionar a tela
