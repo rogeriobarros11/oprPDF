@@ -3,48 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flipbook com WowBook.js</title>
-    <!-- Estilo do WowBook.js -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/wowbook/1.3.0/wowbook.css">
-    <!-- CSS adicional opcional -->
+    <title>Flipbook PDF</title>
     <style>
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            height: 100vh;
+            justify-content: center;
             background-color: #f8f8f8;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #flipbook {
+            width: 90vw;
+            max-width: 800px;
+            height: calc(90vw * 0.75);
+            max-height: 600px;
+            margin: auto;
+        }
+
+        .page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
         }
     </style>
 </head>
 <body>
     <!-- Contêiner do Flipbook -->
-    <div id="flipbook" style="width: 800px; height: 600px; margin: auto;"></div>
+    <div id="flipbook"></div>
 
-    <!-- Bibliotecas necessárias -->
+    <!-- Bibliotecas -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/wowbook/1.3.0/wowbook.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 
-    <!-- Script para inicializar o WowBook.js -->
     <script>
-        $(document).ready(function () {
-            $("#flipbook").wowBook({
-                pdf: "your.pdf", // Substitua pelo caminho correto do seu PDF
-                width: 800, // Largura do flipbook
-                height: 600, // Altura do flipbook
-                centeredWhenClosed: true,
-                hardcovers: true,
-                flipSound: true, // Som ao virar páginas
-                zoomStep: 0.3, // Permite zoom
-                pdfFind: true, // Ativa busca no PDF
-                toolbar: "last-first, zoomin, zoomout, slideshow, find, fullscreen",
-                onLoad: function () {
-                    console.log("Flipbook carregado com sucesso!");
-                }
+        const pdfURL = "your.pdf"; // Substitua pelo caminho correto do seu PDF
+        const flipbook = document.getElementById("flipbook");
+
+        // Configuração do PDF.js Worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
+
+        const loadPDF = async () => {
+            const pdf = await pdfjsLib.getDocument(pdfURL).promise;
+            const totalPages = pdf.numPages;
+
+            // Renderizar todas as páginas do PDF
+            for (let i = 1; i <= totalPages; i++) {
+                const page = await pdf.getPage(i);
+                const viewport = page.getViewport({ scale: 1.5 });
+
+                // Criar canvas para a página
+                const canvas = document.createElement("canvas");
+                const context = canvas.getContext("2d");
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+
+                // Renderizar a página no canvas
+                await page.render({ canvasContext: context, viewport }).promise;
+
+                // Adicionar página ao Flipbook
+                const pageDiv = document.createElement("div");
+                pageDiv.className = "page";
+                pageDiv.appendChild(canvas);
+                flipbook.appendChild(pageDiv);
+            }
+
+            // Inicializar o Flipbook
+            $("#flipbook").turn({
+                width: flipbook.offsetWidth,
+                height: flipbook.offsetHeight,
+                autoCenter: true,
+                display: "double",
             });
-        });
+        };
+
+        loadPDF();
     </script>
 </body>
 </html>
