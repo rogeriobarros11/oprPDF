@@ -19,6 +19,21 @@
             width: 800px;
             height: 600px;
         }
+
+        .page {
+            width: 800px; /* Largura definida do flipbook */
+            height: 600px; /* Altura definida do flipbook */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: white;
+            overflow: hidden; /* Garante que não haja vazamento de conteúdo */
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
     </style>
 </head>
 <body>
@@ -35,25 +50,32 @@
     <script>
         const pdfURL = "your.pdf"; // Caminho do PDF
         const flipbook = document.getElementById("flipbook");
+        const flipbookWidth = 800; // Largura desejada
+        const flipbookHeight = 600; // Altura desejada
 
         // Configuração do PDF.js
         pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
 
         // Carregar o PDF
         pdfjsLib.getDocument(pdfURL).promise.then(pdf => {
-            const totalPages = pdf.numPages; // Total de páginas no PDF
+            const totalPages = pdf.numPages;
 
-            // Renderizar cada página como um canvas e adicionar ao Turn.js
+            // Renderizar uma página ajustada ao tamanho do Flipbook
             const renderPage = (pageNumber) => {
                 return pdf.getPage(pageNumber).then(page => {
-                    const viewport = page.getViewport({ scale: 1.5 }); // Define o tamanho do canvas
+                    const viewport = page.getViewport({ scale: 1 }); // Inicialmente escala 1
+
+                    // Calcula a escala para ajustar ao Flipbook
+                    const scale = Math.min(flipbookWidth / viewport.width, flipbookHeight / viewport.height);
+                    const adjustedViewport = page.getViewport({ scale });
+
                     const canvas = document.createElement("canvas");
                     const context = canvas.getContext("2d");
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
 
-                    // Renderiza a página no canvas
-                    return page.render({ canvasContext: context, viewport }).promise.then(() => {
+                    canvas.width = adjustedViewport.width;
+                    canvas.height = adjustedViewport.height;
+
+                    return page.render({ canvasContext: context, viewport: adjustedViewport }).promise.then(() => {
                         const pageDiv = document.createElement("div");
                         pageDiv.className = "page";
                         pageDiv.appendChild(canvas);
@@ -68,10 +90,10 @@
                     await renderPage(i);
                 }
 
-                // Inicializar Turn.js após renderizar todas as páginas
+                // Inicializa o Turn.js após renderizar as páginas
                 $("#flipbook").turn({
-                    width: 800,
-                    height: 600,
+                    width: flipbookWidth,
+                    height: flipbookHeight,
                     autoCenter: true,
                     duration: 800
                 });
