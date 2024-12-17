@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flipbook com Turn.js e PDF.js</title>
+    <title>Flipbook Responsivo com Turn.js e PDF.js</title>
     <style>
         body {
             margin: 0;
@@ -13,14 +13,13 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            overflow: hidden;
         }
 
         #flipbook {
             width: 90vw;
             height: auto;
             max-width: 800px;
-            aspect-ratio: 4 / 3; /* Mantém a proporção fixa */
+            aspect-ratio: 4 / 3; /* Proporção fixa */
             margin: auto;
         }
 
@@ -45,75 +44,76 @@
     <!-- Contêiner do Flipbook -->
     <div id="flipbook"></div>
 
-    <!-- Bibliotecas -->
+    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
+    <!-- Turn.js -->
+    <script src="libs/turn.min.js"></script>
+    <!-- PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 
     <script>
-        const pdfURL = "your.pdf"; // Substitua pelo caminho do PDF
+        const pdfURL = "your.pdf"; // Caminho do PDF
         const flipbook = document.getElementById("flipbook");
 
         // Configuração do PDF.js
         pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
 
-        // Função para carregar e renderizar o PDF
-        const loadPDF = async () => {
-            const pdf = await pdfjsLib.getDocument(pdfURL).promise;
-            const totalPages = pdf.numPages;
-
-            for (let i = 1; i <= totalPages; i++) {
-                await renderPage(pdf, i);
-            }
-
-            // Inicializa o Turn.js somente após todas as páginas serem renderizadas
-            initializeFlipbook();
-        };
-
-        // Renderizar uma página do PDF
-        const renderPage = async (pdf, pageNumber) => {
-            const page = await pdf.getPage(pageNumber);
-            const viewport = page.getViewport({ scale: 1.5 });
-
-            // Criar canvas para renderizar a página
-            const canvas = document.createElement("canvas");
-            const context = canvas.getContext("2d");
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
-
-            await page.render({ canvasContext: context, viewport }).promise;
-
-            // Criar um elemento div.page e adicionar ao Flipbook
-            const pageDiv = document.createElement("div");
-            pageDiv.className = "page";
-            pageDiv.appendChild(canvas);
-            flipbook.appendChild(pageDiv);
-        };
-
-        // Inicializar o Turn.js (Flipbook)
-        const initializeFlipbook = () => {
-            console.log("Inicializando Turn.js...");
-            $("#flipbook").turn({
-                width: flipbook.offsetWidth,
-                height: flipbook.offsetWidth * 0.75, // Mantém a proporção 4:3
-                autoCenter: true,
-                duration: 800,
-                display: "double",
-            });
-        };
-
-        // Reajustar o Flipbook ao redimensionar a tela
-        window.addEventListener("resize", () => {
-            const width = flipbook.offsetWidth;
-            if ($("#flipbook").data("turn")) {
-                $("#flipbook").turn("size", width, width * 0.75);
-            }
-        });
+        // Detectar dispositivo móvel
+        const isMobile = /iPhone|iPad|Android|webOS|BlackBerry|Windows Phone/i.test(navigator.userAgent);
 
         // Carregar o PDF
-        loadPDF().catch(error => {
+        pdfjsLib.getDocument(pdfURL).promise.then(pdf => {
+            const totalPages = pdf.numPages;
+
+            // Renderizar uma página ajustada ao tamanho do Flipbook
+            const renderPage = (pageNumber) => {
+                return pdf.getPage(pageNumber).then(page => {
+                    const viewport = page.getViewport({ scale: 1 });
+
+                    // Ajuste dinâmico para telas menores
+                    const flipbookWidth = flipbook.offsetWidth;
+                    const scale = flipbookWidth / viewport.width;
+                    const adjustedViewport = page.getViewport({ scale });
+
+                    const canvas = document.createElement("canvas");
+                    const context = canvas.getContext("2d");
+                    canvas.width = adjustedViewport.width;
+                    canvas.height = adjustedViewport.height;
+
+                    return page.render({ canvasContext: context, viewport: adjustedViewport }).promise.then(() => {
+                        const pageDiv = document.createElement("div");
+                        pageDiv.className = "page";
+                        pageDiv.appendChild(canvas);
+                        flipbook.appendChild(pageDiv);
+                    });
+                });
+            };
+
+            // Renderizar todas as páginas
+            const renderAllPages = async () => {
+                for (let i = 1; i <= totalPages; i++) {
+                    await renderPage(i);
+                }
+
+                // Inicializa Turn.js com suporte para mobile
+                $("#flipbook").turn({
+                    width: flipbook.offsetWidth,
+                    height: flipbook.offsetWidth * 0.75, // Proporção 4:3
+                    autoCenter: true,
+                    duration: 800,
+                    display: isMobile ? "single" : "double" // Modo single page em dispositivos móveis
+                });
+            };
+
+            renderAllPages();
+        }).catch(error => {
             console.error("Erro ao carregar o PDF:", error);
-            alert("Não foi possível carregar o PDF. Verifique o arquivo e tente novamente.");
+        });
+
+        // Recalcular o flipbook ao redimensionar a tela
+        window.addEventListener("resize", () => {
+            const width = flipbook.offsetWidth;
+            $("#flipbook").turn("size", width, width * 0.75);
         });
     </script>
 </body>
