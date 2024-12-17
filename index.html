@@ -3,30 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flipbook com Turn.js e PDF.js</title>
+    <title>Flipbook com Turn.js</title>
     <style>
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f8f8f8;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            background-color: #f8f8f8;
             height: 100vh;
             overflow: hidden;
         }
 
+        #flipbook {
+            width: 90vw;
+            max-width: 800px;
+            height: 600px;
+        }
+
         #controls {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
             margin-bottom: 10px;
         }
 
         button {
-            padding: 10px;
+            padding: 8px 12px;
             font-size: 16px;
+            margin: 0 5px;
             border: none;
             background-color: #007bff;
             color: white;
@@ -38,26 +41,9 @@
             background-color: #0056b3;
         }
 
-        #flipbook {
-            width: 90vw;
-            max-width: 800px;
-            height: 90vh;
-            margin: auto;
-            transform-origin: center center;
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .page {
-            background-color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        canvas {
+        .page img {
             width: 100%;
-            height: 100%;
-            display: block;
+            height: auto;
         }
     </style>
 </head>
@@ -66,85 +52,43 @@
         <button id="zoom-in">+</button>
         <button id="zoom-out">-</button>
     </div>
-    <div id="flipbook"></div>
+    <div id="flipbook">
+        <!-- Adicione as imagens pré-renderizadas aqui -->
+        <div class="page"><img src="page-1.png" alt="Página 1"></div>
+        <div class="page"><img src="page-2.png" alt="Página 2"></div>
+        <div class="page"><img src="page-3.png" alt="Página 3"></div>
+        <div class="page"><img src="page-4.png" alt="Página 4"></div>
+        <!-- Adicione mais páginas conforme necessário -->
+    </div>
 
-    <!-- jQuery -->
+    <!-- jQuery e Turn.js -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Turn.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
-    <!-- PDF.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 
     <script>
-        const pdfURL = "your.pdf"; // Caminho do PDF
-        const flipbook = document.getElementById("flipbook");
-        let zoomLevel = 1.0;
-        let pdfInstance;
-
-        // Configuração do worker do PDF.js
-        pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
-
-        // Carregar e renderizar o PDF
-        const loadPDF = async () => {
-            pdfInstance = await pdfjsLib.getDocument(pdfURL).promise;
-            const totalPages = pdfInstance.numPages;
-
-            for (let i = 1; i <= totalPages; i++) {
-                await renderPage(i);
-            }
-
-            // Inicializar Turn.js após todas as páginas serem carregadas
-            initializeTurnJS();
-        };
-
-        // Renderizar cada página
-        const renderPage = async (pageNumber) => {
-            const page = await pdfInstance.getPage(pageNumber);
-            const viewport = page.getViewport({ scale: 1.5 });
-
-            const canvas = document.createElement("canvas");
-            const context = canvas.getContext("2d");
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
-
-            await page.render({ canvasContext: context, viewport }).promise;
-
-            const pageDiv = document.createElement("div");
-            pageDiv.className = "page";
-            pageDiv.style.width = `${viewport.width}px`;
-            pageDiv.style.height = `${viewport.height}px`;
-            pageDiv.appendChild(canvas);
-
-            flipbook.appendChild(pageDiv);
-        };
-
-        // Inicializar Turn.js
-        const initializeTurnJS = () => {
+        $(document).ready(function () {
+            // Inicializa o Flipbook com Turn.js
             $("#flipbook").turn({
-                width: flipbook.offsetWidth,
-                height: flipbook.offsetHeight,
+                width: 800,
+                height: 600,
                 autoCenter: true,
                 duration: 800,
                 display: "double",
             });
-        };
 
-        // Aplicar Zoom
-        const applyZoom = (delta) => {
-            zoomLevel = Math.max(0.5, Math.min(2.0, zoomLevel + delta));
-            flipbook.style.transform = `scale(${zoomLevel})`;
-        };
+            let zoomLevel = 1;
 
-        document.getElementById("zoom-in").addEventListener("click", () => applyZoom(0.1));
-        document.getElementById("zoom-out").addEventListener("click", () => applyZoom(-0.1));
+            // Controle de Zoom
+            $("#zoom-in").on("click", function () {
+                zoomLevel = Math.min(zoomLevel + 0.1, 2);
+                $("#flipbook").css("transform", `scale(${zoomLevel})`);
+            });
 
-        window.addEventListener("resize", () => {
-            if ($("#flipbook").data("turn")) {
-                $("#flipbook").turn("size", flipbook.offsetWidth, flipbook.offsetHeight);
-            }
+            $("#zoom-out").on("click", function () {
+                zoomLevel = Math.max(zoomLevel - 0.1, 0.5);
+                $("#flipbook").css("transform", `scale(${zoomLevel})`);
+            });
         });
-
-        loadPDF(); // Carregar PDF ao iniciar
     </script>
 </body>
 </html>
