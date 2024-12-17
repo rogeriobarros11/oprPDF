@@ -72,28 +72,31 @@
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Turn.js -->
-    <script src="libs/turn.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
     <!-- PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 
     <script>
         const pdfURL = "your.pdf"; // Caminho do PDF
         const flipbook = document.getElementById("flipbook");
-        let zoomLevel = 1.0; // Nível de zoom padrão
+        let zoomLevel = 1.0; // Nível inicial de zoom
         let pdfInstance;
 
         // Configuração do PDF.js
         pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
 
-        // Carregar o PDF
+        // Carregar e Renderizar o PDF
         const loadPDF = async () => {
+            console.log("Carregando PDF...");
             pdfInstance = await pdfjsLib.getDocument(pdfURL).promise;
+            console.log("PDF carregado com sucesso!");
             renderFlipbook();
         };
 
         // Renderizar todas as páginas
         const renderFlipbook = async () => {
-            flipbook.innerHTML = ""; // Limpa o conteúdo do Flipbook
+            console.log("Renderizando flipbook com zoom:", zoomLevel);
+            flipbook.innerHTML = ""; // Limpa o conteúdo anterior
             const totalPages = pdfInstance.numPages;
 
             for (let i = 1; i <= totalPages; i++) {
@@ -102,12 +105,11 @@
                 const canvas = document.createElement("canvas");
                 const context = canvas.getContext("2d");
 
-                // Ajuste dinâmico do canvas
+                // Ajusta dinamicamente o tamanho do canvas
                 canvas.width = viewport.width;
                 canvas.height = viewport.height;
                 await page.render({ canvasContext: context, viewport }).promise;
 
-                // Adiciona a página ao Flipbook
                 const pageDiv = document.createElement("div");
                 pageDiv.className = "page";
                 pageDiv.appendChild(canvas);
@@ -115,21 +117,42 @@
             }
 
             // Inicializa ou recria o Turn.js
+            if ($("#flipbook").data("turn")) {
+                $("#flipbook").turn("destroy");
+            }
             $("#flipbook").turn({
                 width: flipbook.offsetWidth,
-                height: flipbook.offsetHeight,
+                height: flipbook.offsetWidth * 0.75,
                 autoCenter: true,
                 duration: 800
             });
+            console.log("Flipbook renderizado!");
         };
 
         // Funções de Zoom
         document.getElementById("zoom-in").addEventListener("click", () => {
             if (zoomLevel < 3.0) {
-                zoomLevel += 0.25; // Aumenta o zoom
-                $("#flipbook").turn("destroy"); // Destrói a instância atual do Turn.js
-                renderFlipbook(); // Recarrega as páginas com novo zoom
+                zoomLevel += 0.25;
+                renderFlipbook();
             }
         });
 
         document.getElementById("zoom-out").addEventListener("click", () => {
+            if (zoomLevel > 0.5) {
+                zoomLevel -= 0.25;
+                renderFlipbook();
+            }
+        });
+
+        // Reajustar o tamanho ao redimensionar a tela
+        window.addEventListener("resize", () => {
+            if ($("#flipbook").data("turn")) {
+                $("#flipbook").turn("size", flipbook.offsetWidth, flipbook.offsetWidth * 0.75);
+            }
+        });
+
+        // Carregar o PDF
+        loadPDF();
+    </script>
+</body>
+</html>
