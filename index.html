@@ -16,12 +16,6 @@
             overflow: hidden;
         }
 
-        #flipbook {
-            width: 90vw;
-            max-width: 800px;
-            height: 600px;
-        }
-
         #controls {
             margin-bottom: 10px;
         }
@@ -41,6 +35,12 @@
             background-color: #0056b3;
         }
 
+        #flipbook {
+            width: 90vw;
+            max-width: 800px;
+            height: 600px;
+        }
+
         .page img {
             width: 100%;
             height: auto;
@@ -53,12 +53,10 @@
         <button id="zoom-out">-</button>
     </div>
     <div id="flipbook">
-        <!-- Adicione as imagens pré-renderizadas aqui -->
         <div class="page"><img src="page-1.png" alt="Página 1"></div>
         <div class="page"><img src="page-2.png" alt="Página 2"></div>
         <div class="page"><img src="page-3.png" alt="Página 3"></div>
         <div class="page"><img src="page-4.png" alt="Página 4"></div>
-        <!-- Adicione mais páginas conforme necessário -->
     </div>
 
     <!-- jQuery e Turn.js -->
@@ -67,7 +65,7 @@
 
     <script>
         $(document).ready(function () {
-            // Inicializa o Flipbook com Turn.js
+            // Inicializa o Flipbook
             $("#flipbook").turn({
                 width: 800,
                 height: 600,
@@ -78,7 +76,7 @@
 
             let zoomLevel = 1;
 
-            // Controle de Zoom
+            // Botões de Zoom
             $("#zoom-in").on("click", function () {
                 zoomLevel = Math.min(zoomLevel + 0.1, 2);
                 $("#flipbook").css("transform", `scale(${zoomLevel})`);
