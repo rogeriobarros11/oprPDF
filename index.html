@@ -74,10 +74,10 @@
                                 // Renderizar uma página ajustada ao tamanho do Flipbook
             const renderPage = (pageNumber) => {
                 return pdf.getPage(pageNumber).then(page => {
-                    const viewport = page.getViewport({ scale: 0.7 });
+                    const viewport = page.getViewport({ scale: 0.5 });
 
 //
-//             // Aumentar a escala para melhorar a qualidade
+//             // Aumentar a escala para melhorar a qualidade - xxxxx não funcionou, diminuir aumentou a qualidade xxxxx
 //            const highQualityScale = 2.5; // Ajuste para melhorar qualidade (2.0 - 3.0 recomendado)
 //            const viewport = page.getViewport({ scale: highQualityScale });
 //
