@@ -1,30 +1,38 @@
-const url = './your.pdf'; // Caminho do PDF no diretório raiz
-const flipbook = document.getElementById('flipbook'); // Contêiner principal
+// Caminho do PDF
+const url = './your.pdf';
 
+// Configuração do workerSrc necessário para PDF.js
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+// Referência ao flipbook
+const flipbook = document.getElementById('flipbook');
+
+// Carregar o PDF
 pdfjsLib.getDocument(url).promise.then(pdf => {
-    const totalPages = pdf.numPages; // Número total de páginas
-    let loadedPages = 0; // Contador de páginas renderizadas
+    const totalPages = pdf.numPages;
+    let pagesLoaded = 0;
 
     // Função para renderizar cada página
     const renderPage = (pageNum) => {
-        pdf.getPage(pageNum).then(page => {
-            const viewport = page.getViewport({ scale: 1.5 }); // Tamanho da página
-            const canvas = document.createElement('canvas'); // Canvas para a página
+        return pdf.getPage(pageNum).then(page => {
+            const viewport = page.getViewport({ scale: 1.5 });
+            const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
             canvas.height = viewport.height;
             canvas.width = viewport.width;
 
             // Renderiza a página no canvas
-            page.render({ canvasContext: context, viewport }).promise.then(() => {
+            return page.render({ canvasContext: context, viewport }).promise.then(() => {
+                // Adiciona o canvas dentro de um elemento div
                 const pageDiv = document.createElement('div');
-                pageDiv.className = 'page'; // Classe que Turn.js precisa
-                pageDiv.appendChild(canvas); // Adiciona o canvas à página
-                flipbook.appendChild(pageDiv); // Adiciona ao flipbook
+                pageDiv.className = 'page';
+                pageDiv.appendChild(canvas);
+                flipbook.appendChild(pageDiv);
 
-                loadedPages++;
+                pagesLoaded++;
 
-                // Inicializa o Turn.js após todas as páginas carregarem
-                if (loadedPages === totalPages) {
+                // Inicializa o Turn.js quando todas as páginas estiverem carregadas
+                if (pagesLoaded === totalPages) {
                     $('#flipbook').turn({
                         width: 800,
                         height: 600,
@@ -39,4 +47,6 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
     for (let i = 1; i <= totalPages; i++) {
         renderPage(i);
     }
-}).catch(err => console.error('Erro ao carregar o PDF:', err));
+}).catch(error => {
+    console.error('Erro ao carregar o PDF:', error);
+});
