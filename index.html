@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flipbook com Turn.js e PDF.js</title>
+    <title>Flipbook Responsivo com Turn.js e PDF.js</title>
     <style>
         body {
             margin: 0;
@@ -16,18 +16,21 @@
         }
 
         #flipbook {
-            width: 800px;
-            height: 600px;
+            width: 90vw; /* 90% da largura da tela */
+            height: 80vh; /* 80% da altura da tela */
+            max-width: 800px; /* Largura máxima */
+            max-height: 600px; /* Altura máxima */
+            margin: auto;
         }
 
         .page {
-            width: 800px; /* Largura definida do flipbook */
-            height: 600px; /* Altura definida do flipbook */
+            width: 100%;
+            height: 100%;
+            background-color: white;
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: white;
-            overflow: hidden; /* Garante que não haja vazamento de conteúdo */
+            overflow: hidden;
         }
 
         canvas {
@@ -50,8 +53,6 @@
     <script>
         const pdfURL = "your.pdf"; // Caminho do PDF
         const flipbook = document.getElementById("flipbook");
-        const flipbookWidth = 800; // Largura desejada
-        const flipbookHeight = 600; // Altura desejada
 
         // Configuração do PDF.js
         pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
@@ -63,15 +64,16 @@
             // Renderizar uma página ajustada ao tamanho do Flipbook
             const renderPage = (pageNumber) => {
                 return pdf.getPage(pageNumber).then(page => {
-                    const viewport = page.getViewport({ scale: 1 }); // Inicialmente escala 1
+                    const viewport = page.getViewport({ scale: 1 });
 
-                    // Calcula a escala para ajustar ao Flipbook
+                    // Ajuste dinâmico para telas menores
+                    const flipbookWidth = flipbook.offsetWidth;
+                    const flipbookHeight = flipbook.offsetHeight;
                     const scale = Math.min(flipbookWidth / viewport.width, flipbookHeight / viewport.height);
                     const adjustedViewport = page.getViewport({ scale });
 
                     const canvas = document.createElement("canvas");
                     const context = canvas.getContext("2d");
-
                     canvas.width = adjustedViewport.width;
                     canvas.height = adjustedViewport.height;
 
@@ -90,10 +92,10 @@
                     await renderPage(i);
                 }
 
-                // Inicializa o Turn.js após renderizar as páginas
+                // Inicializar Turn.js após renderizar as páginas
                 $("#flipbook").turn({
-                    width: flipbookWidth,
-                    height: flipbookHeight,
+                    width: flipbook.offsetWidth,
+                    height: flipbook.offsetHeight,
                     autoCenter: true,
                     duration: 800
                 });
@@ -102,6 +104,11 @@
             renderAllPages();
         }).catch(error => {
             console.error("Erro ao carregar o PDF:", error);
+        });
+
+        // Recalcular o flipbook ao redimensionar a tela
+        window.addEventListener("resize", () => {
+            $("#flipbook").turn("size", flipbook.offsetWidth, flipbook.offsetHeight);
         });
     </script>
 </body>
