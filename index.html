@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flipbook com Zoom Dinâmico</title>
+    <title>Flipbook com Zoom Dinâmico - Turn.js e PDF.js</title>
     <style>
         body {
             margin: 0;
@@ -12,7 +12,9 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             height: 100vh;
+            overflow: hidden;
         }
 
         #controls {
@@ -42,23 +44,19 @@
             height: calc(90vw * 0.75);
             max-height: 600px;
             margin: auto;
-            transform-origin: center center; /* Ponto de origem do zoom */
-            transition: transform 0.3s ease-in-out; /* Suaviza o zoom */
+            transform-origin: center center; /* Zoom origin */
+            transition: transform 0.3s ease-in-out;
         }
 
         .page {
-            width: 100%;
-            height: 100%;
             background-color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             overflow: hidden;
         }
 
         canvas {
             width: 100%;
             height: 100%;
+            display: block;
         }
     </style>
 </head>
@@ -82,76 +80,48 @@
     <script>
         const pdfURL = "your.pdf"; // Caminho do PDF
         const flipbook = document.getElementById("flipbook");
-        let zoomLevel = 1.0; // Nível de zoom padrão
+        let zoomLevel = 1.0; // Nível inicial de zoom
         let pdfInstance;
 
         // Configuração do PDF.js
         pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
 
-        // Carregar e renderizar o PDF
+        // Carregar o PDF
         const loadPDF = async () => {
             pdfInstance = await pdfjsLib.getDocument(pdfURL).promise;
-            renderPages();
+            renderFlipbook();
         };
 
-        // Renderizar as páginas do PDF
-        const renderPages = async () => {
+        // Renderizar páginas do PDF
+        const renderFlipbook = async () => {
+            flipbook.innerHTML = ""; // Limpar contêiner
+
             const totalPages = pdfInstance.numPages;
 
             for (let i = 1; i <= totalPages; i++) {
                 const page = await pdfInstance.getPage(i);
-                const viewport = page.getViewport({ scale: 1.0 });
+                const viewport = page.getViewport({ scale: 1.5 });
+
+                // Criar elemento canvas
                 const canvas = document.createElement("canvas");
                 const context = canvas.getContext("2d");
-
                 canvas.width = viewport.width;
                 canvas.height = viewport.height;
+
+                // Renderizar a página no canvas
                 await page.render({ canvasContext: context, viewport }).promise;
 
+                // Inserir cada página como um elemento <div>
                 const pageDiv = document.createElement("div");
                 pageDiv.className = "page";
+                pageDiv.style.width = `${viewport.width}px`;
+                pageDiv.style.height = `${viewport.height}px`;
                 pageDiv.appendChild(canvas);
+
                 flipbook.appendChild(pageDiv);
             }
 
-            // Inicializar Turn.js após adicionar páginas
+            // Inicializar Turn.js
             $("#flipbook").turn({
                 width: flipbook.offsetWidth,
-                height: flipbook.offsetWidth * 0.75,
-                autoCenter: true,
-                duration: 800,
-                display: "double"
-            });
-        };
-
-        // Aplicar Zoom no Flipbook
-        const applyZoom = (scale) => {
-            zoomLevel = scale;
-            flipbook.style.transform = `scale(${zoomLevel})`;
-        };
-
-        // Eventos dos botões de zoom
-        document.getElementById("zoom-in").addEventListener("click", () => {
-            if (zoomLevel < 2.5) {
-                applyZoom(zoomLevel + 0.1);
-            }
-        });
-
-        document.getElementById("zoom-out").addEventListener("click", () => {
-            if (zoomLevel > 0.5) {
-                applyZoom(zoomLevel - 0.1);
-            }
-        });
-
-        // Carregar o PDF ao iniciar
-        loadPDF();
-
-        // Ajustar tamanho ao redimensionar a tela
-        window.addEventListener("resize", () => {
-            if ($("#flipbook").data("turn")) {
-                $("#flipbook").turn("size", flipbook.offsetWidth, flipbook.offsetWidth * 0.75);
-            }
-        });
-    </script>
-</body>
-</html>
+          
