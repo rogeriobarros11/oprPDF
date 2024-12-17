@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flipbook com Turn.js</title>
+    <title>Flipbook PDF</title>
     <style>
         body {
             margin: 0;
@@ -16,77 +16,73 @@
             overflow: hidden;
         }
 
-        #controls {
-            margin-bottom: 10px;
-        }
-
-        button {
-            padding: 8px 12px;
-            font-size: 16px;
-            margin: 0 5px;
-            border: none;
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
         #flipbook {
             width: 90vw;
             max-width: 800px;
-            height: 600px;
+            height: calc(90vw * 0.75);
+            max-height: 600px;
+            margin: auto;
         }
 
-        .page img {
-            width: 100%;
-            height: auto;
+        .page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
         }
     </style>
 </head>
 <body>
-    <div id="controls">
-        <button id="zoom-in">+</button>
-        <button id="zoom-out">-</button>
-    </div>
-    <div id="flipbook">
-        <div class="page"><img src="page-1.png" alt="Página 1"></div>
-        <div class="page"><img src="page-2.png" alt="Página 2"></div>
-        <div class="page"><img src="page-3.png" alt="Página 3"></div>
-        <div class="page"><img src="page-4.png" alt="Página 4"></div>
-    </div>
+    <!-- Contêiner do Flipbook -->
+    <div id="flipbook"></div>
 
-    <!-- jQuery e Turn.js -->
+    <!-- Bibliotecas -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 
     <script>
-        $(document).ready(function () {
-            // Inicializa o Flipbook
+        const pdfURL = "your.pdf"; // Substitua pelo caminho correto do seu PDF
+        const flipbook = document.getElementById("flipbook");
+
+        // Configuração do PDF.js Worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
+
+        const loadPDF = async () => {
+            const pdf = await pdfjsLib.getDocument(pdfURL).promise;
+            const totalPages = pdf.numPages;
+
+            // Renderizar todas as páginas do PDF
+            for (let i = 1; i <= totalPages; i++) {
+                const page = await pdf.getPage(i);
+                const viewport = page.getViewport({ scale: 1.5 });
+
+                // Criar canvas para a página
+                const canvas = document.createElement("canvas");
+                const context = canvas.getContext("2d");
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+
+                // Renderizar a página no canvas
+                await page.render({ canvasContext: context, viewport }).promise;
+
+                // Adicionar página ao Flipbook
+                const pageDiv = document.createElement("div");
+                pageDiv.className = "page";
+                pageDiv.appendChild(canvas);
+                flipbook.appendChild(pageDiv);
+            }
+
+            // Inicializar o Flipbook
             $("#flipbook").turn({
-                width: 800,
-                height: 600,
+                width: flipbook.offsetWidth,
+                height: flipbook.offsetHeight,
                 autoCenter: true,
-                duration: 800,
                 display: "double",
             });
+        };
 
-            let zoomLevel = 1;
-
-            // Botões de Zoom
-            $("#zoom-in").on("click", function () {
-                zoomLevel = Math.min(zoomLevel + 0.1, 2);
-                $("#flipbook").css("transform", `scale(${zoomLevel})`);
-            });
-
-            $("#zoom-out").on("click", function () {
-                zoomLevel = Math.max(zoomLevel - 0.1, 0.5);
-                $("#flipbook").css("transform", `scale(${zoomLevel})`);
-            });
-        });
+        loadPDF();
     </script>
 </body>
 </html>
