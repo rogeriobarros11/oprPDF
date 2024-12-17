@@ -3,46 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flipbook com WowBook.js</title>
-    <!-- Estilo da Biblioteca WowBook.js -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/wowbook/1.3.0/wowbook.css">
-    <!-- Seu CSS personalizado -->
+    <title>Flipbook com Turn.js</title>
+    <!-- CSS básico -->
     <style>
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
+            background-color: #f8f8f8;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f8f8f8;
+        }
+
+        #flipbook {
+            width: 800px;
+            height: 600px;
+            margin: auto;
+        }
+
+        #flipbook .page {
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            text-align: center;
+            line-height: 600px;
+            font-size: 24px;
+            border: 1px solid #ccc;
         }
     </style>
 </head>
 <body>
     <!-- Contêiner do Flipbook -->
-    <div id="flipbook" style="width: 800px; height: 600px; margin: auto;"></div>
+    <div id="flipbook">
+        <div class="page">Página 1</div>
+        <div class="page">Página 2</div>
+        <div class="page">Página 3</div>
+        <div class="page">Página 4</div>
+    </div>
 
-    <!-- Bibliotecas Necessárias -->
+    <!-- Biblioteca jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/wowbook/1.3.0/wowbook.min.js"></script>
+    <!-- Turn.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
 
-    <!-- Script de Inicialização do WowBook.js -->
+    <!-- Script para inicializar o Turn.js -->
     <script>
         $(document).ready(function () {
-            $("#flipbook").wowBook({
-                pdf: "your.pdf", // Substitua pelo caminho correto do seu PDF
+            $("#flipbook").turn({
                 width: 800,
                 height: 600,
-                centeredWhenClosed: true,
-                hardcovers: true,
-                flipSound: true,
-                zoomStep: 0.3,
-                pdfFind: true, // Permite busca no PDF
-                toolbar: "last-first, zoomin, zoomout, slideshow, find, fullscreen",
-                onLoad: function () {
-                    console.log("Flipbook carregado com sucesso!");
-                }
+                autoCenter: true
             });
         });
     </script>
