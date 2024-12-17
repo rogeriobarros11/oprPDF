@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flipbook com Turn.js</title>
-    <!-- CSS básico -->
     <style>
         body {
             margin: 0;
-            background-color: #f8f8f8;
+            font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            background-color: #f8f8f8;
         }
 
         #flipbook {
@@ -21,7 +21,7 @@
             margin: auto;
         }
 
-        #flipbook .page {
+        .page {
             width: 100%;
             height: 100%;
             background-color: white;
@@ -33,7 +33,6 @@
     </style>
 </head>
 <body>
-    <!-- Contêiner do Flipbook -->
     <div id="flipbook">
         <div class="page">Página 1</div>
         <div class="page">Página 2</div>
@@ -41,19 +40,24 @@
         <div class="page">Página 4</div>
     </div>
 
-    <!-- Biblioteca jQuery -->
+    <!-- Bibliotecas necessárias -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Turn.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
 
-    <!-- Script para inicializar o Turn.js -->
+    <!-- Inicialização do Turn.js -->
     <script>
         $(document).ready(function () {
-            $("#flipbook").turn({
-                width: 800,
-                height: 600,
-                autoCenter: true
-            });
+            if ($.fn.turn) {
+                $("#flipbook").turn({
+                    width: 800,
+                    height: 600,
+                    autoCenter: true,
+                    duration: 800
+                });
+                console.log("Turn.js carregado com sucesso!");
+            } else {
+                console.error("Erro: Turn.js não foi carregado corretamente.");
+            }
         });
     </script>
 </body>
