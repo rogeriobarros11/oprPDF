@@ -19,7 +19,7 @@
             width: 90vw;
             height: auto;
             max-width: 800px;
-            aspect-ratio: 4 / 3; /* Mantém proporção 4:3 */
+            aspect-ratio: 4 / 3; /* Proporção fixa */
             margin: auto;
         }
 
@@ -58,6 +58,9 @@
         // Configuração do PDF.js
         pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
 
+        // Detectar dispositivo móvel
+        const isMobile = /iPhone|iPad|Android|webOS|BlackBerry|Windows Phone/i.test(navigator.userAgent);
+
         // Carregar o PDF
         pdfjsLib.getDocument(pdfURL).promise.then(pdf => {
             const totalPages = pdf.numPages;
@@ -67,9 +70,9 @@
                 return pdf.getPage(pageNumber).then(page => {
                     const viewport = page.getViewport({ scale: 1 });
 
-                    // Mantém a proporção original da página
-                    const containerWidth = flipbook.offsetWidth;
-                    const scale = containerWidth / viewport.width;
+                    // Ajuste dinâmico para telas menores
+                    const flipbookWidth = flipbook.offsetWidth;
+                    const scale = flipbookWidth / viewport.width;
                     const adjustedViewport = page.getViewport({ scale });
 
                     const canvas = document.createElement("canvas");
@@ -92,12 +95,13 @@
                     await renderPage(i);
                 }
 
-                // Inicializa Turn.js
+                // Inicializa Turn.js com suporte para mobile
                 $("#flipbook").turn({
                     width: flipbook.offsetWidth,
-                    height: flipbook.offsetWidth * 0.75, // Mantém proporção 4:3
+                    height: flipbook.offsetWidth * 0.75, // Proporção 4:3
                     autoCenter: true,
-                    duration: 800
+                    duration: 800,
+                    display: isMobile ? "single" : "double" // Modo single page em dispositivos móveis
                 });
             };
 
@@ -108,7 +112,8 @@
 
         // Recalcular o flipbook ao redimensionar a tela
         window.addEventListener("resize", () => {
-            $("#flipbook").turn("size", flipbook.offsetWidth, flipbook.offsetWidth * 0.75);
+            const width = flipbook.offsetWidth;
+            $("#flipbook").turn("size", width, width * 0.75);
         });
     </script>
 </body>
