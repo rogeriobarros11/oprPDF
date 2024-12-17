@@ -3,32 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flipbook PDF</title>
+    <title>Flipbook Responsivo com Turn.js e PDF.js</title>
     <style>
         body {
             margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
             background-color: #f8f8f8;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             height: 100vh;
-            overflow: hidden;
         }
 
         #flipbook {
             width: 90vw;
+            height: auto;
             max-width: 800px;
-            height: calc(90vw * 0.75);
-            max-height: 600px;
+            aspect-ratio: 4 / 3; /* Proporção fixa */
             margin: auto;
         }
 
         .page {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 100%;
+            height: 100%;
             background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        canvas {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
     </style>
 </head>
@@ -36,53 +44,77 @@
     <!-- Contêiner do Flipbook -->
     <div id="flipbook"></div>
 
-    <!-- Bibliotecas -->
+    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
+    <!-- Turn.js -->
+    <script src="libs/turn.min.js"></script>
+    <!-- PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 
     <script>
-        const pdfURL = "your.pdf"; // Substitua pelo caminho correto do seu PDF
+        const pdfURL = "your.pdf"; // Caminho do PDF
         const flipbook = document.getElementById("flipbook");
 
-        // Configuração do PDF.js Worker
+        // Configuração do PDF.js
         pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
 
-        const loadPDF = async () => {
-            const pdf = await pdfjsLib.getDocument(pdfURL).promise;
+        // Detectar dispositivo móvel
+        const isMobile = /iPhone|iPad|Android|webOS|BlackBerry|Windows Phone/i.test(navigator.userAgent);
+
+        // Carregar o PDF
+        pdfjsLib.getDocument(pdfURL).promise.then(pdf => {
             const totalPages = pdf.numPages;
 
-            // Renderizar todas as páginas do PDF
-            for (let i = 1; i <= totalPages; i++) {
-                const page = await pdf.getPage(i);
-                const viewport = page.getViewport({ scale: 1.5 });
+            // Renderizar uma página ajustada ao tamanho do Flipbook
+            const renderPage = (pageNumber) => {
+                return pdf.getPage(pageNumber).then(page => {
+                    const viewport = page.getViewport({ scale: 1 });
 
-                // Criar canvas para a página
-                const canvas = document.createElement("canvas");
-                const context = canvas.getContext("2d");
-                canvas.width = viewport.width;
-                canvas.height = viewport.height;
+                    // Ajuste dinâmico para telas menores
+                    const flipbookWidth = flipbook.offsetWidth;
+                    const scale = flipbookWidth / viewport.width;
+                    const adjustedViewport = page.getViewport({ scale });
 
-                // Renderizar a página no canvas
-                await page.render({ canvasContext: context, viewport }).promise;
+                    const canvas = document.createElement("canvas");
+                    const context = canvas.getContext("2d");
+                    canvas.width = adjustedViewport.width;
+                    canvas.height = adjustedViewport.height;
 
-                // Adicionar página ao Flipbook
-                const pageDiv = document.createElement("div");
-                pageDiv.className = "page";
-                pageDiv.appendChild(canvas);
-                flipbook.appendChild(pageDiv);
-            }
+                    return page.render({ canvasContext: context, viewport: adjustedViewport }).promise.then(() => {
+                        const pageDiv = document.createElement("div");
+                        pageDiv.className = "page";
+                        pageDiv.appendChild(canvas);
+                        flipbook.appendChild(pageDiv);
+                    });
+                });
+            };
 
-            // Inicializar o Flipbook
-            $("#flipbook").turn({
-                width: flipbook.offsetWidth,
-                height: flipbook.offsetHeight,
-                autoCenter: true,
-                display: "double",
-            });
-        };
+            // Renderizar todas as páginas
+            const renderAllPages = async () => {
+                for (let i = 1; i <= totalPages; i++) {
+                    await renderPage(i);
+                }
 
-        loadPDF();
+                // Inicializa Turn.js com suporte para mobile
+                $("#flipbook").turn({
+                    width: flipbook.offsetWidth,
+                    height: flipbook.offsetWidth * 0.75, // Proporção 4:3
+                    autoCenter: true,
+                    duration: 800,
+                    display: isMobile ? "single" : "double" // Modo single page em dispositivos móveis
+                });
+            };
+
+            renderAllPages();
+        }).catch(error => {
+            console.error("Erro ao carregar o PDF:", error);
+        });
+
+        // Recalcular o flipbook ao redimensionar a tela
+        window.addEventListener("resize", () => {
+            const width = flipbook.offsetWidth;
+            $("#flipbook").turn("size", width, width * 0.75);
+        });
     </script>
 </body>
 </html>
